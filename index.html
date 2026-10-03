@@ -8,7 +8,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e0e6f0;min-height:100vh;padding-bottom:80px}
-.header{background:linear-gradient(135deg,#0D47A1,#1565C0);padding:16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.header{background:linear-gradient(135deg,#0D47A1,#1565C0);padding:16px;position:sticky;top:0;z-index:100}
 .header h1{font-size:18px;font-weight:700}
 .header .status{font-size:11px;opacity:.85;margin-top:4px}
 .screen{display:none;padding:16px}
@@ -21,7 +21,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .card h2{font-size:15px;margin-bottom:12px;color:#fff;font-weight:600}
 .card h3{font-size:13px;margin-bottom:8px;color:#4A90E2;font-weight:600}
 .btn{background:linear-gradient(135deg,#1565C0,#0D47A1);color:#fff;border:none;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-top:8px}
-.btn:active{transform:scale(.97)}
 .btn-outline{background:transparent;border:1px solid #4A90E2;color:#4A90E2}
 .empty{text-align:center;padding:40px 20px;color:#6b7899}
 .empty-icon{font-size:48px;margin-bottom:12px;opacity:.5}
@@ -65,7 +64,6 @@ details{margin-top:8px}
 summary{cursor:pointer;font-size:12px;color:#8892b0;padding:6px 0}
 .reunion-header{background:#1565C0;color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;margin:12px 0 8px}
 .race-item{background:#151b2e;border:1px solid #232b47;border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer}
-.race-item:active{background:#1a2138}
 .race-item .rn{font-size:13px;font-weight:700;color:#fff}
 .race-item .rm{font-size:11px;color:#8892b0;margin-top:4px}
 </style>
@@ -74,12 +72,12 @@ summary{cursor:pointer;font-size:12px;color:#8892b0;padding:6px 0}
 
 <div class="header">
 <h1>🏇 PMU Analyzer</h1>
-<div class="status" id="status">Chargement du programme...</div>
+<div class="status" id="status">Chargement...</div>
 </div>
 
 <div class="screen active" id="screen-accueil">
 <div id="accueil-content">
-<div class="empty"><div class="loader"></div><p style="margin-top:12px">Récupération des courses du jour...</p></div>
+<div class="empty"><div class="loader"></div><p style="margin-top:12px">Récupération des courses...</p></div>
 </div>
 </div>
 
@@ -112,32 +110,6 @@ summary{cursor:pointer;font-size:12px;color:#8892b0;padding:6px 0}
 <script>
 const STATE={courses:[],currentCourse:null,currentAnalysis:null,seuil:0.80};
 
-const PMU_BASE='https://online.turfinfo.api.pmu.fr/rest/client/61/programme';
-
-const PROXIES=[
-  u=>'https://corsproxy.io/?'+encodeURIComponent(u),
-  u=>'https://corsproxy.io/?url='+encodeURIComponent(u),
-  u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),
-  u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u)
-];
-
-async function smartFetch(url){
-  const errors=[];
-  for(let i=0;i<PROXIES.length;i++){
-    try{
-      const ctrl=new AbortController();
-      const to=setTimeout(()=>ctrl.abort(),25000);
-      const res=await fetch(PROXIES[i](url),{signal:ctrl.signal});
-      clearTimeout(to);
-      if(!res.ok){errors.push('HTTP '+res.status);continue}
-      const text=await res.text();
-      if(!text||text.length<20){errors.push('empty');continue}
-      try{return JSON.parse(text)}catch(e){errors.push('bad json');continue}
-    }catch(e){errors.push(e.message||'fail');continue}
-  }
-  throw new Error('Erreurs: '+errors.join(' | '));
-}
-
 function todayFR(){
   const d=new Date();
   const dd=String(d.getDate()).padStart(2,'0');
@@ -145,9 +117,48 @@ function todayFR(){
   return dd+mm+d.getFullYear();
 }
 
+// Proxies testés dans l'ordre - le premier qui marche gagne
+async function smartFetch(targetUrl){
+  const proxies=[
+    u=>'https://r.jina.ai/'+u,
+    u=>'https://corsproxy.io/?'+encodeURIComponent(u),
+    u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),
+    u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u)
+  ];
+  const errors=[];
+  for(const proxy of proxies){
+    try{
+      const ctrl=new AbortController();
+      const to=setTimeout(()=>ctrl.abort(),20000);
+      const res=await fetch(proxy(targetUrl),{signal:ctrl.signal});
+      clearTimeout(to);
+      if(!res.ok){errors.push('HTTP'+res.status);continue}
+      let text=await res.text();
+      // r.jina.ai retourne du markdown, on cherche le JSON dedans
+      if(text.includes('Markdown Content:')){
+        const idx=text.indexOf('Markdown Content:');
+        text=text.substring(idx+17).trim();
+      }
+      // Essaie de parser
+      try{return JSON.parse(text)}
+      catch(e){
+        // Cherche le premier { et le dernier }
+        const start=text.indexOf('{');
+        const end=text.lastIndexOf('}');
+        if(start>=0&&end>start){
+          try{return JSON.parse(text.substring(start,end+1))}
+          catch(e2){errors.push('parse');continue}
+        }
+        errors.push('nojson');continue;
+      }
+    }catch(e){errors.push(e.message||'fail');continue}
+  }
+  throw new Error('Proxies: '+errors.join(','));
+}
+
 async function fetchProgramme(){
-  updateStatus('Récupération du programme...',true);
-  const url=PMU_BASE+'/'+todayFR();
+  updateStatus('Chargement du programme...',true);
+  const url='https://online.turfinfo.api.pmu.fr/rest/client/61/programme/'+todayFR();
   const data=await smartFetch(url);
   return parseProgramme(data);
 }
@@ -177,31 +188,25 @@ function parseProgramme(data){
 }
 
 async function fetchParticipants(course){
-  const date=todayFR();
-  const url=PMU_BASE+'/'+date+'/R'+course.reunion+'/C'+course.numero+'/participants';
+  const url='https://online.turfinfo.api.pmu.fr/rest/client/61/programme/'+todayFR()+'/R'+course.reunion+'/C'+course.numero+'/participants';
   try{
     const data=await smartFetch(url);
     const parts=[];
-    const list=data.participants||[];
-    list.forEach(p=>{
+    (data.participants||[]).forEach(p=>{
       parts.push({
         numero:p.numPmu||p.numero,
         nom:p.nom||'Cheval',
-        cote:(p.dernierRapportDirect&&p.dernierRapportDirect.rapport)||(p.dernierRapportReference&&p.dernierRapportReference.rapport)||null,
+        cote:(p.dernierRapportDirect&&p.dernierRapportDirect.rapport)||null,
         jockey:p.driver||p.jockey||null,
         entraineur:p.entraineur||null,
         poids:p.poidsConditionMonte||p.poids||null,
         corde:p.placeCorde||null,
         age:p.age||null,
-        sexe:p.sexe||null,
         performances:[]
       });
     });
     return parts.filter(p=>p.numero);
-  }catch(e){
-    console.warn('Participants error',e);
-    return [];
-  }
+  }catch(e){return []}
 }
 
 function perfToScore(place,nb){if(!place||!nb||nb<=1)return null;return Math.max(0,1-(place-1)/(nb-1))}
@@ -291,7 +296,7 @@ function updateStatus(msg,load){document.getElementById('status').innerHTML=(loa
 function renderAccueil(){
   const el=document.getElementById('accueil-content');
   if(!STATE.courses.length){
-    el.innerHTML='<div class="empty"><div class="empty-icon">📡</div><p>Aucune course chargée</p><button class="btn" onclick="loadAll()">Recharger</button></div>';
+    el.innerHTML='<div class="empty"><div class="empty-icon">📡</div><p>Aucune course</p><button class="btn" onclick="loadAll()">Recharger</button></div>';
     return;
   }
   const byReu={};STATE.courses.forEach(c=>{(byReu[c.reunion]=byReu[c.reunion]||[]).push(c)});
@@ -315,7 +320,7 @@ async function selectCourse(id){
     c.partants=await fetchParticipants(c);
   }
   if(!c.partants.length){
-    document.getElementById('course-content').innerHTML='<div class="card"><div class="error">Aucun partant disponible.<br>Essaie une autre course ou attends un peu (les partants arrivent souvent 1h avant).</div><button class="btn" onclick="showScreen(\'accueil\')">Retour</button></div>';
+    document.getElementById('course-content').innerHTML='<div class="card"><div class="error">Aucun partant disponible.<br>Essaie une autre course.</div><button class="btn" onclick="showScreen(\'accueil\')">Retour</button></div>';
     return;
   }
   STATE.currentCourse=c;
@@ -366,7 +371,7 @@ function renderResultat(){
   if(!STATE.currentAnalysis){el.innerHTML='<div class="empty"><div class="empty-icon">🎯</div><p>Sélectionne une course</p></div>';return}
   const combos=STATE.currentAnalysis.combinaisons;const s=STATE.seuil;
   const f=combos.filter(c=>c.confiance>=s);
-  if(!f.length){el.innerHTML='<div class="card"><div class="warning">Aucune combinaison ne dépasse le seuil '+(s*100).toFixed(0)+'%</div></div>';return}
+  if(!f.length){el.innerHTML='<div class="card"><div class="warning">Aucune combinaison au-dessus du seuil '+(s*100).toFixed(0)+'%</div></div>';return}
   let html='<div class="info">Seuil '+(s*100).toFixed(0)+'% · '+f.length+' combinaison(s)</div>';
   f.forEach(c=>{
     html+='<div class="combo"><div class="combo-header"><span class="combo-scenario scenario-'+c.scenario+'">'+c.scenario+'</span><span class="combo-conf">'+(c.confiance*100).toFixed(0)+'%</span></div><div class="combo-nums">'+c.numeros.map((n,i)=>'<span class="combo-num">'+String(n).padStart(2,'0')+' '+c.noms[i]+'</span>').join('')+'</div><div class="combo-detail">Robustesse '+(c.robustesse*100).toFixed(0)+'% · Risque '+(c.risque*100).toFixed(0)+'%'+(c.outsiderPresent?' · ⚠️ Outsider':'')+'</div>'+(c.explications.length?'<details><summary>Pourquoi ?</summary><div class="combo-expl">'+c.explications.map(e=>'• '+e).join('<br>')+'</div></details>':'')+'</div>';
@@ -382,7 +387,7 @@ async function loadAll(){
     updateStatus(courses.length+' courses · '+new Date().toLocaleTimeString('fr-FR'));
     renderAccueil();
   }catch(e){
-    updateStatus('Erreur');
+    updateStatus('Erreur : '+e.message.substring(0,60));
     document.getElementById('accueil-content').innerHTML='<div class="card"><div class="error">'+e.message+'</div><button class="btn" onclick="loadAll()">Réessayer</button></div>';
   }
 }
