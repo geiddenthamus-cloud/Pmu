@@ -95,7 +95,6 @@ summary{cursor:pointer;font-size:12px;color:#8892b0;padding:6px 0}
 <div class="card">
 <h2>ℹ️ À propos</h2>
 <div class="warning"><strong>⚠️ Avertissement</strong><br>Outil d'aide statistique. Aucun gain garanti. Jouez responsable.</div>
-<div class="info"><strong>Source</strong><br>Données publiques PMU (programme officiel). Rafraîchissement auto toutes les 30s.</div>
 </div>
 </div>
 
@@ -111,32 +110,32 @@ summary{cursor:pointer;font-size:12px;color:#8892b0;padding:6px 0}
 </div>
 
 <script>
-const STATE={courses:[],currentCourse:null,currentAnalysis:null,seuil:0.80,lastUpdate:null};
+const STATE={courses:[],currentCourse:null,currentAnalysis:null,seuil:0.80};
 
-const PMU_API='https://online.turfinfo.api.pmu.fr/rest/client/1/programme';
+const PMU_BASE='https://online.turfinfo.api.pmu.fr/rest/client/61/programme';
 
 const PROXIES=[
+  u=>'https://corsproxy.io/?'+encodeURIComponent(u),
   u=>'https://corsproxy.io/?url='+encodeURIComponent(u),
   u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),
-  u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u),
-  u=>'https://thingproxy.freeboard.io/fetch/'+u,
-  u=>u
+  u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u)
 ];
 
-async function smartFetch(url,timeout=12000){
+async function smartFetch(url){
+  const errors=[];
   for(let i=0;i<PROXIES.length;i++){
     try{
       const ctrl=new AbortController();
-      const to=setTimeout(()=>ctrl.abort(),timeout);
+      const to=setTimeout(()=>ctrl.abort(),25000);
       const res=await fetch(PROXIES[i](url),{signal:ctrl.signal});
       clearTimeout(to);
-      if(!res.ok)continue;
+      if(!res.ok){errors.push('HTTP '+res.status);continue}
       const text=await res.text();
-      if(!text||text.length<20)continue;
-      try{return JSON.parse(text)}catch(e){continue}
-    }catch(e){continue}
+      if(!text||text.length<20){errors.push('empty');continue}
+      try{return JSON.parse(text)}catch(e){errors.push('bad json');continue}
+    }catch(e){errors.push(e.message||'fail');continue}
   }
-  throw new Error('Tous les proxies ont échoué');
+  throw new Error('Erreurs: '+errors.join(' | '));
 }
 
 function todayFR(){
@@ -147,15 +146,15 @@ function todayFR(){
 }
 
 async function fetchProgramme(){
-  updateStatus('Récupération du programme PMU...',true);
-  const url=PMU_API+'/'+todayFR();
+  updateStatus('Récupération du programme...',true);
+  const url=PMU_BASE+'/'+todayFR();
   const data=await smartFetch(url);
   return parseProgramme(data);
 }
 
 function parseProgramme(data){
   const courses=[];
-  const reunions=data.programme&&data.programme.reunions?data.programme.reunions:[];
+  const reunions=(data.programme&&data.programme.reunions)||[];
   reunions.forEach(r=>{
     const hippo=r.hippodrome?(r.hippodrome.libelleLong||r.hippodrome.libelleCourt):'Réunion '+r.numOfficiel;
     (r.courses||[]).forEach(c=>{
@@ -179,23 +178,23 @@ function parseProgramme(data){
 
 async function fetchParticipants(course){
   const date=todayFR();
-  const url=PMU_API+'/'+date+'/R'+course.reunion+'/C'+course.numero+'/participants';
+  const url=PMU_BASE+'/'+date+'/R'+course.reunion+'/C'+course.numero+'/participants';
   try{
     const data=await smartFetch(url);
     const parts=[];
-    const list=data.participants||data.partants||[];
+    const list=data.participants||[];
     list.forEach(p=>{
       parts.push({
         numero:p.numPmu||p.numero,
         nom:p.nom||'Cheval',
-        cote:p.dernierRapportDirect?p.dernierRapportDirect.rapport:(p.dernierRapportReference?p.dernierRapportReference.rapport:null),
+        cote:(p.dernierRapportDirect&&p.dernierRapportDirect.rapport)||(p.dernierRapportReference&&p.dernierRapportReference.rapport)||null,
         jockey:p.driver||p.jockey||null,
         entraineur:p.entraineur||null,
         poids:p.poidsConditionMonte||p.poids||null,
         corde:p.placeCorde||null,
         age:p.age||null,
         sexe:p.sexe||null,
-        performances:(p.musique||'').split(' ').filter(Boolean).map(m=>({raw:m}))
+        performances:[]
       });
     });
     return parts.filter(p=>p.numero);
@@ -292,16 +291,16 @@ function updateStatus(msg,load){document.getElementById('status').innerHTML=(loa
 function renderAccueil(){
   const el=document.getElementById('accueil-content');
   if(!STATE.courses.length){
-    el.innerHTML='<div class="empty"><div class="empty-icon">📡</div><p>Aucune course chargée</p><button class="btn" onclick="loadAll()">Recharger le programme</button></div>';
+    el.innerHTML='<div class="empty"><div class="empty-icon">📡</div><p>Aucune course chargée</p><button class="btn" onclick="loadAll()">Recharger</button></div>';
     return;
   }
   const byReu={};STATE.courses.forEach(c=>{(byReu[c.reunion]=byReu[c.reunion]||[]).push(c)});
-  let html='<div class="info">'+STATE.courses.length+' courses · mise à jour '+new Date().toLocaleTimeString('fr-FR')+'</div>';
+  let html='<div class="info">'+STATE.courses.length+' courses · '+new Date().toLocaleTimeString('fr-FR')+'</div>';
   Object.keys(byReu).sort((a,b)=>a-b).forEach(r=>{
     const reu=byReu[r];
     html+='<div class="reunion-header">RÉUNION '+r+' · '+(reu[0].hippodrome||'')+'</div>';
     reu.forEach(c=>{
-      html+='<div class="race-item" onclick="selectCourse(\''+c.id+'\')"><div class="rn">C'+c.numero+' — '+c.nom+'</div><div class="rm">'+c.heure+' · '+(c.distance?c.distance+'m':'')+' '+(c.discipline||'')+' · '+c.partants.length+' partants</div></div>';
+      html+='<div class="race-item" onclick="selectCourse(\''+c.id+'\')"><div class="rn">C'+c.numero+' — '+c.nom+'</div><div class="rm">'+c.heure+' · '+(c.distance?c.distance+'m':'')+' '+(c.discipline||'')+'</div></div>';
     });
   });
   el.innerHTML=html;
@@ -316,7 +315,7 @@ async function selectCourse(id){
     c.partants=await fetchParticipants(c);
   }
   if(!c.partants.length){
-    document.getElementById('course-content').innerHTML='<div class="card"><div class="error">Aucun partant disponible. Cela peut signifier :<br>• la course n\'a pas encore ses partants<br>• le proxy est bloqué<br>• essaie une autre course</div><button class="btn" onclick="showScreen(\'accueil\')">Retour</button></div>';
+    document.getElementById('course-content').innerHTML='<div class="card"><div class="error">Aucun partant disponible.<br>Essaie une autre course ou attends un peu (les partants arrivent souvent 1h avant).</div><button class="btn" onclick="showScreen(\'accueil\')">Retour</button></div>';
     return;
   }
   STATE.currentCourse=c;
@@ -339,11 +338,11 @@ function renderCourse(){
   if(!STATE.currentAnalysis){el.innerHTML='<div class="empty"><p>Sélectionne une course</p></div>';return}
   const c=STATE.currentCourse;
   let html='<div class="card"><h2>R'+c.reunion+'C'+c.numero+' · '+c.hippodrome+'</h2><div style="font-size:12px;color:#b0b8d0">'+c.nom+'</div><div style="font-size:11px;color:#6b7899;margin-top:6px">'+c.heure+' · '+(c.distance?c.distance+'m':'')+' · '+(c.discipline||'')+'</div></div>';
-  html+='<div class="card"><h2>📊 Analyse ('+STATE.currentAnalysis.analyses.length+' partants)</h2>';
+  html+='<div class="card"><h2>📊 Analyse ('+STATE.currentAnalysis.analyses.length+')</h2>';
   STATE.currentAnalysis.analyses.forEach(a=>{
     const p=(a.globalScore*100).toFixed(0);
     const col=a.globalScore>.6?'score-high':a.globalScore>.4?'score-mid':'score-low';
-    html+='<div class="horse-row" onclick="showHorse('+a.numero+')"><div class="horse-num">'+a.numero+'</div><div class="horse-info"><div class="horse-name">'+a.nom+' '+(a.estOutsider?'<span class="badge badge-outsider">Outsider</span>':'')+' '+(a.rang===1?'<span class="badge badge-favori">Top</span>':'')+'</div><div class="horse-meta">'+(a.cote?'Cote '+a.cote.toFixed(2):'Cote —')+' · Qualité '+(a.qualite*100).toFixed(0)+'%</div><div class="score-bar"><div class="score-fill '+col+'" style="width:'+p+'%"></div></div></div><div class="horse-score">'+p+'%</div></div>';
+    html+='<div class="horse-row" onclick="showHorse('+a.numero+')"><div class="horse-num">'+a.numero+'</div><div class="horse-info"><div class="horse-name">'+a.nom+' '+(a.estOutsider?'<span class="badge badge-outsider">Outsider</span>':'')+' '+(a.rang===1?'<span class="badge badge-favori">Top</span>':'')+'</div><div class="horse-meta">'+(a.cote?'Cote '+a.cote.toFixed(2):'Cote —')+'</div><div class="score-bar"><div class="score-fill '+col+'" style="width:'+p+'%"></div></div></div><div class="horse-score">'+p+'%</div></div>';
   });
   html+='</div>';
   el.innerHTML=html;
@@ -352,7 +351,7 @@ function renderCourse(){
 function showHorse(num){
   const a=STATE.currentAnalysis.analyses.find(x=>x.numero===num);
   if(!a)return;
-  let html='<div class="card"><h2>'+a.numero+'. '+a.nom+'</h2><div style="font-size:12px;color:#b0b8d0">Score : '+(a.globalScore*100).toFixed(1)+'%</div><div style="font-size:12px;color:#b0b8d0">Qualité : '+(a.qualite*100).toFixed(0)+'%</div>';
+  let html='<div class="card"><h2>'+a.numero+'. '+a.nom+'</h2><div style="font-size:12px;color:#b0b8d0">Score : '+(a.globalScore*100).toFixed(1)+'%</div>';
   if(a.estOutsider)html+='<div class="warning" style="margin-top:10px">⚠️ '+a.signauxOutsider.join(' · ')+'</div>';
   html+='</div><div class="card"><h3>Facteurs</h3>';
   a.factors.slice().sort((x,y)=>(y.weight*y.value)-(x.weight*x.value)).forEach(f=>{
@@ -364,13 +363,13 @@ function showHorse(num){
 
 function renderResultat(){
   const el=document.getElementById('resultat-content');
-  if(!STATE.currentAnalysis){el.innerHTML='<div class="empty"><div class="empty-icon">🎯</div><p>Sélectionne une course d\'abord</p></div>';return}
+  if(!STATE.currentAnalysis){el.innerHTML='<div class="empty"><div class="empty-icon">🎯</div><p>Sélectionne une course</p></div>';return}
   const combos=STATE.currentAnalysis.combinaisons;const s=STATE.seuil;
   const f=combos.filter(c=>c.confiance>=s);
   if(!f.length){el.innerHTML='<div class="card"><div class="warning">Aucune combinaison ne dépasse le seuil '+(s*100).toFixed(0)+'%</div></div>';return}
   let html='<div class="info">Seuil '+(s*100).toFixed(0)+'% · '+f.length+' combinaison(s)</div>';
   f.forEach(c=>{
-    html+='<div class="combo"><div class="combo-header"><span class="combo-scenario scenario-'+c.scenario+'">'+c.scenario+'</span><span class="combo-conf">'+(c.confiance*100).toFixed(0)+'%</span></div><div class="combo-nums">'+c.numeros.map((n,i)=>'<span class="combo-num">'+String(n).padStart(2,'0')+' '+c.noms[i]+'</span>').join('')+'</div><div class="combo-detail">Robustesse '+(c.robustesse*100).toFixed(0)+'% · Risque '+(c.risque*100).toFixed(0)+'%'+(c.outsiderPresent?' · ⚠️ Outsider inclus':'')+'</div>'+(c.explications.length?'<details><summary>Pourquoi ?</summary><div class="combo-expl">'+c.explications.map(e=>'• '+e).join('<br>')+'</div></details>':'')+'</div>';
+    html+='<div class="combo"><div class="combo-header"><span class="combo-scenario scenario-'+c.scenario+'">'+c.scenario+'</span><span class="combo-conf">'+(c.confiance*100).toFixed(0)+'%</span></div><div class="combo-nums">'+c.numeros.map((n,i)=>'<span class="combo-num">'+String(n).padStart(2,'0')+' '+c.noms[i]+'</span>').join('')+'</div><div class="combo-detail">Robustesse '+(c.robustesse*100).toFixed(0)+'% · Risque '+(c.risque*100).toFixed(0)+'%'+(c.outsiderPresent?' · ⚠️ Outsider':'')+'</div>'+(c.explications.length?'<details><summary>Pourquoi ?</summary><div class="combo-expl">'+c.explications.map(e=>'• '+e).join('<br>')+'</div></details>':'')+'</div>';
   });
   el.innerHTML=html;
 }
@@ -378,18 +377,17 @@ function renderResultat(){
 async function loadAll(){
   try{
     const courses=await fetchProgramme();
-    if(!courses.length)throw new Error('Aucune course dans le programme');
+    if(!courses.length)throw new Error('Aucune course');
     STATE.courses=courses;
-    updateStatus(courses.length+' courses chargées · '+new Date().toLocaleTimeString('fr-FR'));
+    updateStatus(courses.length+' courses · '+new Date().toLocaleTimeString('fr-FR'));
     renderAccueil();
   }catch(e){
-    updateStatus('Erreur : '+e.message);
+    updateStatus('Erreur');
     document.getElementById('accueil-content').innerHTML='<div class="card"><div class="error">'+e.message+'</div><button class="btn" onclick="loadAll()">Réessayer</button></div>';
   }
 }
 
 loadAll();
-setInterval(loadAll,60000);
 </script>
 </body>
 </html>
