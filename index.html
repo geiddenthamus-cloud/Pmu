@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="theme-color" content="#0D47A1">
-<title>PMU Analyzer</title>
+<title>PMU Analyzer Pro</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e0e6f0;min-height:100vh;padding-bottom:80px}
@@ -25,28 +25,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .empty{text-align:center;padding:40px 20px;color:#6b7899}
 .empty-icon{font-size:48px;margin-bottom:12px;opacity:.5}
 .empty p{font-size:13px;line-height:1.5}
-.score-bar{height:4px;background:#0a0e1a;border-radius:2px;overflow:hidden;margin-top:4px}
+.score-bar{height:5px;background:#0a0e1a;border-radius:2px;overflow:hidden;margin-top:5px}
 .score-fill{height:100%;border-radius:2px}
 .score-high{background:linear-gradient(90deg,#2E7D32,#66BB6A)}
 .score-mid{background:linear-gradient(90deg,#EF6C00,#FFA726)}
 .score-low{background:linear-gradient(90deg,#C62828,#EF5350)}
-.horse-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #232b47;cursor:pointer}
+.horse-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #232b47;cursor:pointer}
 .horse-row:last-child{border-bottom:none}
-.horse-num{width:32px;height:32px;border-radius:50%;background:#232b47;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.horse-num{width:36px;height:36px;border-radius:50%;background:#232b47;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;border:2px solid #4A90E2}
 .horse-info{flex:1;min-width:0}
 .horse-name{font-size:13px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.horse-meta{font-size:10px;color:#6b7899;margin-top:2px}
-.horse-score{text-align:right;font-size:12px;font-weight:700;color:#4A90E2}
-.badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase}
+.horse-meta{font-size:10px;color:#6b7899;margin-top:3px}
+.horse-score{text-align:right;font-size:14px;font-weight:700;color:#4A90E2;flex-shrink:0}
+.badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;margin-left:4px}
 .badge-outsider{background:#4A148C;color:#CE93D8}
 .badge-favori{background:#1B5E20;color:#A5D6A7}
+.badge-value{background:#E65100;color:#FFCC80}
 .combo{background:#0a0e1a;border:1px solid #232b47;border-radius:10px;padding:14px;margin-bottom:10px}
 .combo-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .combo-scenario{font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 8px;border-radius:4px}
 .scenario-principal{background:#1B5E20;color:#A5D6A7}
 .scenario-alternatif{background:#E65100;color:#FFCC80}
 .scenario-surprise{background:#4A148C;color:#CE93D8}
-.combo-conf{font-size:16px;font-weight:700;color:#4A90E2}
+.combo-conf{font-size:18px;font-weight:700;color:#4A90E2}
 .combo-nums{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .combo-num{background:#1565C0;color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:700}
 .combo-detail{font-size:11px;color:#8892b0;line-height:1.5;margin-top:6px}
@@ -56,28 +57,44 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .error{background:#C6282822;border:1px solid #C62828;color:#EF5350;padding:10px;border-radius:8px;font-size:12px;margin-bottom:12px}
 .loader{display:inline-block;width:16px;height:16px;border:2px solid #232b47;border-top-color:#4A90E2;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
-.factor{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #232b47;font-size:12px}
+.factor{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #232b47;font-size:12px}
 .factor:last-child{border-bottom:none}
-.factor-name{color:#b0b8d0}
-.factor-val{color:#4A90E2;font-weight:700}
+.factor-name{color:#b0b8d0;flex:1}
+.factor-val{color:#4A90E2;font-weight:700;margin-left:8px}
+.factor-bar{width:50px;height:3px;background:#232b47;border-radius:2px;margin-left:8px;overflow:hidden}
+.factor-bar-fill{height:100%;background:#4A90E2}
 details{margin-top:8px}
 summary{cursor:pointer;font-size:12px;color:#8892b0;padding:6px 0}
 .reunion-header{background:#1565C0;color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;margin:12px 0 8px}
 .race-item{background:#151b2e;border:1px solid #232b47;border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer}
 .race-item .rn{font-size:13px;font-weight:700;color:#fff}
 .race-item .rm{font-size:11px;color:#8892b0;margin-top:4px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px}
+.stat-box{background:#0a0e1a;border-radius:8px;padding:8px 4px;text-align:center}
+.stat-box .v{font-size:15px;font-weight:700;color:#4A90E2}
+.stat-box .l{font-size:9px;color:#8892b0;margin-top:3px;text-transform:uppercase;letter-spacing:.3px}
+.musique{font-family:monospace;font-size:12px;color:#b0b8d0;background:#0a0e1a;padding:8px;border-radius:6px;margin-top:8px;letter-spacing:1.5px;word-break:break-all}
+.perf-line{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #232b47;font-size:11px}
+.perf-line:last-child{border-bottom:none}
+.perf-place{font-weight:700;width:30px}
+.perf-place.p1{color:#66BB6A}
+.perf-place.p2{color:#FFA726}
+.perf-place.p3{color:#FFCC80}
+.perf-place.pbad{color:#6b7899}
+.perf-info{flex:1;color:#b0b8d0;margin-left:8px}
+.perf-dist{color:#8892b0;font-size:10px;text-align:right}
 </style>
 </head>
 <body>
 
 <div class="header">
-<h1>🏇 PMU Analyzer</h1>
+<h1>🏇 PMU Analyzer Pro</h1>
 <div class="status" id="status">Chargement...</div>
 </div>
 
 <div class="screen active" id="screen-accueil">
 <div id="accueil-content">
-<div class="empty"><div class="loader"></div><p style="margin-top:12px">Récupération des courses...</p></div>
+<div class="empty"><div class="loader"></div><p style="margin-top:12px">Récupération du programme...</p></div>
 </div>
 </div>
 
@@ -87,12 +104,13 @@ summary{cursor:pointer;font-size:12px;color:#8892b0;padding:6px 0}
 <div class="screen" id="screen-params">
 <div class="card">
 <h2>⚙️ Paramètres</h2>
-<label style="font-size:11px;color:#8892b0">Seuil de confiance : <span id="seuil-val">80</span>%</label>
-<input type="range" id="seuil" min="50" max="99" value="80" style="width:100%;margin-top:8px" oninput="document.getElementById('seuil-val').textContent=this.value;STATE.seuil=this.value/100">
+<label style="font-size:11px;color:#8892b0">Seuil de confiance : <span id="seuil-val">40</span>%</label>
+<input type="range" id="seuil" min="20" max="90" value="40" style="width:100%;margin-top:8px" oninput="document.getElementById('seuil-val').textContent=this.value;STATE.seuil=this.value/100">
 </div>
 <div class="card">
-<h2>ℹ️ À propos</h2>
-<div class="warning"><strong>⚠️ Avertissement</strong><br>Outil d'aide statistique. Aucun gain garanti. Jouez responsable.</div>
+<h2>ℹ️ Analyse approfondie</h2>
+<div class="info">Le moteur analyse 11 facteurs dont l'historique COMPLET de chaque cheval (15 dernières courses avec distance, hippodrome, place).</div>
+<div class="warning"><strong>⚠️ Avertissement</strong><br>Outil d'aide. Aucun gain garanti. Les courses ont une part d'aléatoire importante.</div>
 </div>
 </div>
 
@@ -108,46 +126,33 @@ summary{cursor:pointer;font-size:12px;color:#8892b0;padding:6px 0}
 </div>
 
 <script>
-const STATE={courses:[],currentCourse:null,currentAnalysis:null,seuil:0.80};
+const STATE={courses:[],currentCourse:null,currentAnalysis:null,seuil:0.40};
+const API='https://online.turfinfo.api.pmu.fr/rest/client/61/programme';
 
 function todayFR(){
   const d=new Date();
-  const dd=String(d.getDate()).padStart(2,'0');
-  const mm=String(d.getMonth()+1).padStart(2,'0');
-  return dd+mm+d.getFullYear();
+  return String(d.getDate()).padStart(2,'0')+String(d.getMonth()+1).padStart(2,'0')+d.getFullYear();
 }
 
-// jina.ai : proxy gratuit fiable qui retourne le contenu brut
-async function proxyFetch(targetUrl){
-  const url='https://r.jina.ai/'+targetUrl;
+async function jina(url){
   const ctrl=new AbortController();
-  const to=setTimeout(()=>ctrl.abort(),25000);
-  const res=await fetch(url,{
-    signal:ctrl.signal,
-    headers:{'Accept':'text/plain','X-Return-Format':'text'}
-  });
+  const to=setTimeout(()=>ctrl.abort(),30000);
+  const res=await fetch('https://r.jina.ai/'+url,{signal:ctrl.signal,headers:{'Accept':'text/plain'}});
   clearTimeout(to);
   if(!res.ok)throw new Error('HTTP '+res.status);
   const text=await res.text();
-  // Jina retourne le JSON en brut (parfois avec entête Markdown)
-  const start=text.indexOf('{');
-  const end=text.lastIndexOf('}');
-  if(start<0||end<start)throw new Error('Pas de JSON dans la réponse');
-  return JSON.parse(text.substring(start,end+1));
+  const s=text.indexOf('{');
+  const e=text.lastIndexOf('}');
+  if(s<0||e<s)throw new Error('No JSON');
+  return JSON.parse(text.substring(s,e+1));
 }
 
 async function fetchProgramme(){
   updateStatus('Chargement du programme...',true);
-  const url='https://online.turfinfo.api.pmu.fr/rest/client/61/programme/'+todayFR();
-  const data=await proxyFetch(url);
-  return parseProgramme(data);
-}
-
-function parseProgramme(data){
+  const data=await jina(API+'/'+todayFR());
   const courses=[];
-  const reunions=(data.programme&&data.programme.reunions)||[];
-  reunions.forEach(r=>{
-    const hippo=r.hippodrome?(r.hippodrome.libelleLong||r.hippodrome.libelleCourt):'Réunion '+r.numOfficiel;
+  ((data.programme&&data.programme.reunions)||[]).forEach(r=>{
+    const hippo=r.hippodrome?(r.hippodrome.libelleLong||r.hippodrome.libelleCourt):'R'+r.numOfficiel;
     (r.courses||[]).forEach(c=>{
       courses.push({
         id:r.numOfficiel+'_'+c.numOrdre,
@@ -158,8 +163,7 @@ function parseProgramme(data){
         heure:c.heureDepart?new Date(c.heureDepart).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'',
         distance:c.distance||null,
         discipline:c.discipline||null,
-        terrain:c.penetrometre?c.penetrometre.libelle:null,
-        piste:c.categoriePiste||null,
+        nbDeclares:c.nombreDeclaresPartants||0,
         partants:[]
       });
     });
@@ -168,74 +172,286 @@ function parseProgramme(data){
 }
 
 async function fetchParticipants(course){
-  const url='https://online.turfinfo.api.pmu.fr/rest/client/61/programme/'+todayFR()+'/R'+course.reunion+'/C'+course.numero+'/participants';
+  const url=API+'/'+todayFR()+'/R'+course.reunion+'/C'+course.numero+'/participants';
   try{
-    const data=await proxyFetch(url);
+    const data=await jina(url);
     const parts=[];
     (data.participants||[]).forEach(p=>{
       parts.push({
         numero:p.numPmu||p.numero,
         nom:p.nom||'Cheval',
-        cote:(p.dernierRapportDirect&&p.dernierRapportDirect.rapport)||null,
-        jockey:p.driver||p.jockey||null,
+        coteActuelle:(p.dernierRapportDirect&&p.dernierRapportDirect.rapport)||null,
+        coteReference:(p.dernierRapportReference&&p.dernierRapportReference.rapport)||null,
+        driver:p.driver||p.jockey||null,
         entraineur:p.entraineur||null,
         poids:p.poidsConditionMonte||p.poids||null,
         corde:p.placeCorde||null,
         age:p.age||null,
-        performances:[]
+        sexe:p.sexe||null,
+        musique:p.musique||'',
+        nombreCourses:p.nombreCourses||0,
+        nombreVictoires:p.nombreVictoires||0,
+        nombrePlaces:p.nombrePlaces||0,
+        gainsCarriere:(p.gainsParticipant&&p.gainsParticipant.gainsCarriere)||0,
+        performancesDetaillees:[],
+        driverStats:null,
+        entraineurStats:null
       });
     });
     return parts.filter(p=>p.numero);
-  }catch(e){return []}
+  }catch(e){console.warn(e);return []}
 }
 
-function perfToScore(place,nb){if(!place||!nb||nb<=1)return null;return Math.max(0,1-(place-1)/(nb-1))}
-function recW(i,h=4){return Math.pow(.5,i/h)}
-function scoreForme(perfs){const r=perfs.slice(0,6);let n=0,d=0;r.forEach((p,i)=>{const s=perfToScore(p.place,p.nb_partants);if(s===null)return;const w=recW(i);n+=w*s;d+=w});return{code:'forme',label:'Forme récente',weight:.15,value:d>0?n/d:0}}
-function scoreHistorique(perfs){let n=0,d=0;perfs.forEach(p=>{const s=perfToScore(p.place,p.nb_partants);if(s===null)return;n+=s;d++});return{code:'historique',label:'Historique',weight:.10,value:d>0?n/d:0}}
-function scoreDistance(perfs,dist){if(!dist)return{code:'distance',label:'Distance',weight:.12,value:0};let n=0,d=0;perfs.forEach(p=>{const s=perfToScore(p.place,p.nb_partants);if(s===null||!p.distance)return;const sim=Math.exp(-Math.abs(p.distance-dist)/600);n+=sim*s;d+=sim});return{code:'distance',label:'Distance',weight:.12,value:d>0?n/d:0}}
-function scoreTerrain(perfs,t){if(!t)return{code:'terrain',label:'Terrain',weight:.08,value:0};let n=0,d=0;perfs.forEach(p=>{if(p.terrain!==t)return;const s=perfToScore(p.place,p.nb_partants);if(s===null)return;n+=s;d++});return{code:'terrain',label:'Terrain',weight:.08,value:d>0?n/d:0}}
-function scorePiste(perfs,p){if(!p)return{code:'piste',label:'Piste',weight:.05,value:0};let n=0,d=0;perfs.forEach(x=>{if(x.piste!==p)return;const s=perfToScore(x.place,x.nb_partants);if(s===null)return;n+=s;d++});return{code:'piste',label:'Piste',weight:.05,value:d>0?n/d:0}}
-function scorePoids(poids,moy){if(poids===null||moy===null)return{code:'poids',label:'Poids',weight:.04,value:.5};const d=poids-moy;return{code:'poids',label:'Poids',weight:.04,value:Math.max(0,Math.min(1,.5-d/10))}}
-function scoreCorde(c,dist){if(c===null)return{code:'corde',label:'Corde',weight:.03,value:.5};const d=dist||2000;let v;if(d<1600)v=1-Math.min(Math.abs(c-5)/8,1);else v=.6;return{code:'corde',label:'Corde',weight:.03,value:v}}
-function scoreJockey(perfs,j){if(!j)return{code:'jockey',label:'Jockey',weight:.06,value:.5};let n=0,d=0;perfs.forEach(p=>{if(p.jockey!==j)return;const s=perfToScore(p.place,p.nb_partants);if(s===null)return;n+=s;d++});return{code:'jockey',label:'Jockey',weight:.06,value:d>0?n/d:.5}}
-function scoreEntraineur(perfs,e){if(!e)return{code:'entraineur',label:'Entraîneur',weight:.05,value:.5};let n=0,d=0;perfs.forEach(p=>{if(p.entraineur!==e)return;const s=perfToScore(p.place,p.nb_partants);if(s===null)return;n+=s;d++});return{code:'entraineur',label:'Entraîneur',weight:.05,value:d>0?n/d:.5}}
-function scoreClasse(perfs){const a=perfs.map(p=>p.allocation).filter(x=>x);if(!a.length)return{code:'classe',label:'Classe',weight:.05,value:.5};const avg=a.reduce((x,y)=>x+y,0)/a.length;return{code:'classe',label:'Classe',weight:.05,value:Math.min(1,avg/100000)}}
-function scoreRegularite(perfs){const p=perfs.map(x=>x.place).filter(x=>x!=null);if(p.length<2)return{code:'regularite',label:'Régularité',weight:.04,value:.3};const m=p.reduce((a,b)=>a+b,0)/p.length;const v=p.reduce((a,b)=>a+Math.pow(b-m,2),0)/p.length;const s=Math.sqrt(v);return{code:'regularite',label:'Régularité',weight:.04,value:Math.max(0,1-s/6)}}
-function scoreContexte(perfs,race,j){let n=0,d=0;perfs.forEach(p=>{const s=perfToScore(p.place,p.nb_partants);if(s===null)return;const sim=ctxSim(race,p,j);n+=sim*s;d+=sim});return{code:'contexte',label:'Contexte',weight:.10,value:d>0?n/d:0}}
-function ctxSim(r,p,j){const di=r.distance&&p.distance?Math.exp(-Math.abs(r.distance-p.distance)/600):.5;const t=r.terrain&&p.terrain?(r.terrain===p.terrain?1:.4):.5;const pi=r.piste&&p.piste?(r.piste===p.piste?1:.5):.5;const po=r.poidsMoyen&&p.poids?Math.exp(-Math.abs(r.poidsMoyen-p.poids)/6):.5;const jk=j&&p.jockey?(j===p.jockey?1:.3):.5;return .35*di+.25*t+.15*pi+.10*po+.15*jk}
-function scoreMarche(c){if(!c||c<=1)return{code:'marche',label:'Marché',weight:.08,value:0};return{code:'marche',label:'Marché',weight:.08,value:Math.min(1,(1/c)*3)}}
-function scoreOutsider(perfs,race,cote,j){const sig=[];let n=0;const ctx=scoreContexte(perfs,race,j);if(ctx.value>.6){sig.push('Contexte très favorable');n+=.3}const rec=perfs.slice(0,4);if(rec.length>=3){const r=rec.slice(0,2).filter(p=>p.place).map(p=>p.place);const a=rec.slice(2,4).filter(p=>p.place).map(p=>p.place);if(r.length&&a.length){const mr=r.reduce((x,y)=>x+y,0)/r.length;const ma=a.reduce((x,y)=>x+y,0)/a.length;if(mr<ma-1){sig.push('Forme en amélioration');n+=.25}}}if(cote&&cote>=10){sig.push('Cote élevée ('+cote.toFixed(1)+')');n+=.2}if(race.terrain&&perfs.some(p=>p.terrain===race.terrain&&p.place===1)){sig.push('Déjà gagné sur ce terrain');n+=.25}return{code:'outsider',label:'Signal outsider',weight:.06,value:Math.min(1,n),signals:sig}}
-function scoreQualite(race,p,perfs){const c=[race.distance!=null,race.terrain!=null,p.poids!=null,p.corde!=null,p.jockey!=null,p.entraineur!=null,p.cote!=null,perfs.length>=3];return c.filter(Boolean).length/c.length}
+async function fetchPerformances(course){
+  const url=API+'/'+todayFR()+'/R'+course.reunion+'/C'+course.numero+'/performances-detaillees/pretty';
+  try{
+    const data=await jina(url);
+    const map={};
+    (data.participants||[]).forEach(p=>{
+      const num=p.numPmu||p.numero;
+      map[num]=p.courses||[];
+    });
+    return map;
+  }catch(e){console.warn('Perf error',e);return {}}
+}
 
-function analyzeHorse(p,race){
-  const perfs=(p.performances||[]);
-  const factors=[scoreForme(perfs),scoreHistorique(perfs),scoreDistance(perfs,race.distance),scoreTerrain(perfs,race.terrain),scorePiste(perfs,race.piste),scorePoids(p.poids,race.poidsMoyen),scoreCorde(p.corde,race.distance),scoreJockey(perfs,p.jockey),scoreEntraineur(perfs,p.entraineur),scoreClasse(perfs),scoreRegularite(perfs),scoreContexte(perfs,race,p.jockey),scoreMarche(p.cote),scoreOutsider(perfs,race,p.cote,p.jockey)];
-  const q=scoreQualite(race,p,perfs);
+// Décodage musique PMU
+function parseMusique(musique){
+  if(!musique)return[];
+  const cleaned=musique.replace(/\s/g,'');
+  const tokens=cleaned.match(/(\d{1,2}|0|D|A|T|Ret)(a|m|h|p|c|s|o|g)/gi)||[];
+  const results=[];
+  tokens.forEach(t=>{
+    const pm=t.match(/^(\d{1,2}|0|D|A|T|Ret)/i);
+    const tm=t.match(/(a|m|h|p|c|s|o|g)/i);
+    if(pm){
+      const ps=pm[1].toUpperCase();
+      let place=null;
+      if(ps==='D'||ps==='A'||ps==='T'||ps==='RET')place=null;
+      else{const v=parseInt(ps);place=v===0?null:v}
+      results.push({place,type:tm?tm[1].toLowerCase():'a',raw:t});
+    }
+  });
+  return results;
+}
+
+// ========== SCORES ==========
+function scoreForme(perfs){
+  const recent=perfs.slice(0,8);
+  let n=0,d=0;
+  recent.forEach((p,i)=>{
+    if(p.place===null)return;
+    let s;
+    if(p.place===1)s=1;else if(p.place===2)s=0.85;else if(p.place===3)s=0.7;
+    else if(p.place<=5)s=0.45;else if(p.place<=8)s=0.2;else s=0.05;
+    const w=Math.pow(0.75,i);
+    n+=w*s;d+=w;
+  });
+  return{code:'forme',label:'Forme récente (8c)',weight:.18,value:d>0?n/d:0};
+}
+
+function scoreVictoires(p){
+  if(!p.nombreCourses||p.nombreCourses<3)return{code:'victoires',label:'% Victoires',weight:.14,value:0};
+  const t=p.nombreVictoires/p.nombreCourses;
+  const f=Math.min(1,p.nombreCourses/30);
+  return{code:'victoires',label:'% Victoires',weight:.14,value:Math.min(1,t*3)*f};
+}
+
+function scorePlaces(p){
+  if(!p.nombreCourses||p.nombreCourses<3)return{code:'places',label:'% Places',weight:.10,value:0};
+  const t=p.nombrePlaces/p.nombreCourses;
+  const f=Math.min(1,p.nombreCourses/30);
+  return{code:'places',label:'% Places',weight:.10,value:Math.min(1,t*1.5)*f};
+}
+
+function scoreRegularite(perfs){
+  const pl=perfs.filter(p=>p.place!==null).map(p=>p.place);
+  if(pl.length<3)return{code:'regularite',label:'Régularité',weight:.07,value:0.3};
+  const m=pl.reduce((a,b)=>a+b,0)/pl.length;
+  const v=pl.reduce((a,b)=>a+Math.pow(b-m,2),0)/pl.length;
+  const s=Math.sqrt(v);
+  const reg=Math.max(0,1-s/5);
+  const meanB=Math.max(0,1-m/8);
+  return{code:'regularite',label:'Régularité',weight:.07,value:reg*0.6+meanB*0.4};
+}
+
+function scoreGains(p){
+  if(!p.gainsCarriere||!p.nombreCourses)return{code:'gains',label:'Gains/course',weight:.07,value:0};
+  const g=p.gainsCarriere/p.nombreCourses;
+  return{code:'gains',label:'Gains/course',weight:.07,value:Math.min(1,g/5000)};
+}
+
+function scoreCote(cote){
+  if(!cote||cote<=1)return{code:'cote',label:'Cote marché',weight:.13,value:0};
+  return{code:'cote',label:'Cote marché',weight:.13,value:Math.min(1,(1/cote)*4)};
+}
+
+function scoreMouvement(p){
+  if(!p.coteActuelle||!p.coteReference)return{code:'mouvement',label:'Mouvement cote',weight:.09,value:0.5};
+  const ref=p.coteReference,act=p.coteActuelle;
+  if(ref<=0||act<=0)return{code:'mouvement',label:'Mouvement cote',weight:.09,value:0.5};
+  const v=(ref-act)/ref;
+  let s=0.5+v*1.5;
+  s=Math.max(0,Math.min(1,s));
+  return{code:'mouvement',label:'Mouvement cote',weight:.09,value:s};
+}
+
+// HISTORIQUE PAR DISTANCE
+function scoreDistance(perfsDetaillees,courseDistance){
+  if(!courseDistance||!perfsDetaillees||!perfsDetaillees.length)
+    return{code:'distHist',label:'Hist. par distance',weight:.08,value:0};
+  // Filtre courses avec distance similaire (±10%)
+  const tol=courseDistance*0.15;
+  const similar=perfsDetaillees.filter(c=>c.distance&&Math.abs(c.distance-courseDistance)<=tol);
+  if(similar.length<2)return{code:'distHist',label:'Hist. par distance',weight:.08,value:0.2};
+  let n=0,d=0;
+  similar.forEach(c=>{
+    const place=c.place||c.ordreArrivee;
+    const nb=c.nombreParticipants||c.nbParticipants||15;
+    if(!place)return;
+    let s;
+    if(place===1)s=1;else if(place===2)s=0.85;else if(place===3)s=0.7;
+    else if(place<=5)s=0.5;else s=0.15;
+    const w=Math.min(1,nb/15);
+    n+=s*w;d+=w;
+  });
+  return{code:'distHist',label:'Hist. par distance',weight:.08,value:d>0?n/d:0.2};
+}
+
+// HISTORIQUE PAR HIPPODROME
+function scoreHippodrome(perfsDetaillees,hippodrome){
+  if(!hippodrome||!perfsDetaillees||!perfsDetaillees.length)
+    return{code:'hippoHist',label:'Hist. hippodrome',weight:.06,value:0.3};
+  const h=hippodrome.toLowerCase();
+  const similar=perfsDetaillees.filter(c=>{
+    const hh=(c.hippodrome&&(c.hippodrome.libelleLong||c.hippodrome.libelleCourt))||c.nomHippodrome||'';
+    return hh&&hh.toLowerCase().includes(h.split(' ')[0]);
+  });
+  if(similar.length<1)return{code:'hippoHist',label:'Hist. hippodrome',weight:.06,value:0.3};
+  let n=0;
+  similar.forEach(c=>{
+    const place=c.place||c.ordreArrivee;
+    if(!place)return;
+    let s;
+    if(place===1)s=1;else if(place===2)s=0.85;else if(place===3)s=0.7;
+    else if(place<=5)s=0.5;else s=0.2;
+    n+=s;
+  });
+  return{code:'hippoHist',label:'Hist. hippodrome',weight:.06,value:Math.min(1,n/similar.length)};
+}
+
+// PROGRESSION : dernière vs moyenne
+function scoreProgression(perfs){
+  if(perfs.length<5)return{code:'progression',label:'Progression',weight:.06,value:0.5};
+  const last3=perfs.slice(0,3).filter(p=>p.place!==null);
+  const prev5=perfs.slice(3,8).filter(p=>p.place!==null);
+  if(!last3.length||!prev5.length)return{code:'progression',label:'Progression',weight:.06,value:0.5};
+  const m1=last3.reduce((a,p)=>a+p.place,0)/last3.length;
+  const m2=prev5.reduce((a,p)=>a+p.place,0)/prev5.length;
+  const delta=m2-m1; // positif = amélioration
+  let s=0.5+delta/6;
+  s=Math.max(0,Math.min(1,s));
+  return{code:'progression',label:'Progression',weight:.06,value:s};
+}
+
+function scoreCorde(corde,distance){
+  if(corde===null||corde===undefined)return{code:'corde',label:'Corde',weight:.04,value:0.5};
+  const d=distance||2000;
+  let v;
+  if(d<1600)v=1-Math.min(Math.abs(corde-3)/8,1);
+  else v=0.6;
+  return{code:'corde',label:'Corde',weight:.04,value:v};
+}
+
+function scoreQualite(p,perfs){
+  const c=[
+    p.coteActuelle!=null,p.coteReference!=null,p.driver!=null,p.entraineur!=null,
+    p.nombreCourses>=5,perfs.length>=3,p.age!=null,p.poids!=null,p.corde!=null,
+    p.performancesDetaillees&&p.performancesDetaillees.length>=3
+  ];
+  return c.filter(Boolean).length/c.length;
+}
+
+function analyzeHorse(partant,course){
+  const perfs=parseMusique(partant.musique);
+  const factors=[
+    scoreForme(perfs),
+    scoreVictoires(partant),
+    scorePlaces(partant),
+    scoreRegularite(perfs),
+    scoreGains(partant),
+    scoreCote(partant.coteActuelle),
+    scoreMouvement(partant),
+    scoreDistance(partant.performancesDetaillees,course.distance),
+    scoreHippodrome(partant.performancesDetaillees,course.hippodrome),
+    scoreProgression(perfs),
+    scoreCorde(partant.corde,course.distance)
+  ];
+  const q=scoreQualite(partant,perfs);
   const tw=factors.reduce((a,f)=>a+f.weight,0)||1;
   const w=factors.reduce((a,f)=>a+f.weight*f.value,0)/tw;
-  const gs=w*(.6+.4*q);
-  const o=factors.find(f=>f.code==='outsider');
-  return{numero:p.numero,nom:p.nom,globalScore:Math.max(0,Math.min(1,gs)),qualite:q,factors,signauxOutsider:o&&o.signals?o.signals:[],estOutsider:o&&o.value>=.5,cote:p.cote};
+  const gs=w*(0.7+0.3*q);
+
+  const signauxOutsider=[];
+  const estOutsider=(partant.coteActuelle&&partant.coteActuelle>=10)||false;
+  if(estOutsider){
+    const forme=factors.find(f=>f.code==='forme');
+    const mouv=factors.find(f=>f.code==='mouvement');
+    const dist=factors.find(f=>f.code==='distHist');
+    if(forme&&forme.value>0.5)signauxOutsider.push('Forme solide malgré cote élevée');
+    if(mouv&&mouv.value>0.65)signauxOutsider.push('Argent arrive (cote baisse)');
+    if(dist&&dist.value>0.6)signauxOutsider.push('Bon historique à cette distance');
+    if(partant.nombreVictoires>=3)signauxOutsider.push(partant.nombreVictoires+' victoires carrière');
+  }
+
+  return{
+    numero:partant.numero,
+    nom:partant.nom,
+    driver:partant.driver,
+    entraineur:partant.entraineur,
+    age:partant.age,
+    sexe:partant.sexe,
+    cote:partant.coteActuelle,
+    coteRef:partant.coteReference,
+    musique:partant.musique,
+    perfs,
+    perfsDetaillees:partant.performancesDetaillees,
+    nombreCourses:partant.nombreCourses,
+    nombreVictoires:partant.nombreVictoires,
+    nombrePlaces:partant.nombrePlaces,
+    gainsCarriere:partant.gainsCarriere,
+    globalScore:Math.max(0,Math.min(1,gs)),
+    qualite:q,
+    factors,
+    signauxOutsider,
+    estOutsider,
+    isValueBet:(factors.find(f=>f.code==='mouvement')||{}).value>0.7
+  };
 }
 
 function analyzeRace(course){
-  const pl=course.partants.map(p=>p.poids).filter(p=>p!=null);
-  const pm=pl.length?pl.reduce((a,b)=>a+b,0)/pl.length:null;
-  const race={distance:course.distance,terrain:course.terrain,piste:course.piste,poidsMoyen:pm};
-  const analyses=course.partants.map(p=>analyzeHorse(p,race));
+  const analyses=course.partants.map(p=>analyzeHorse(p,course));
   analyses.sort((a,b)=>b.globalScore-a.globalScore);
   analyses.forEach((a,i)=>a.rang=i+1);
-  return{race,analyses};
+  return{analyses};
 }
 
-function simulate(analyses,iter=5000){
+function simulate(analyses,iter=8000){
   const n=analyses.length;if(!n)return{};
   const pos={};analyses.forEach(a=>pos[a.numero]={top1:0,top3:0,top5:0});
   for(let i=0;i<iter;i++){
-    const draws=analyses.map(a=>{const sig=.06+.18*(1-(a.factors.find(f=>f.code==='regularite')?.value||.5));const u1=Math.random(),u2=Math.random();const z=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);return{num:a.numero,score:a.globalScore+sig*z}});
+    const draws=analyses.map(a=>{
+      const sig=.08+.20*(1-(a.factors.find(f=>f.code==='regularite')?.value||.5));
+      const u1=Math.random(),u2=Math.random();
+      const z=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
+      return{num:a.numero,score:a.globalScore+sig*z};
+    });
     draws.sort((a,b)=>b.score-a.score);
-    draws.forEach((d,idx)=>{if(idx===0)pos[d.num].top1++;if(idx<3)pos[d.num].top3++;if(idx<5)pos[d.num].top5++});
+    draws.forEach((d,idx)=>{
+      if(idx===0)pos[d.num].top1++;
+      if(idx<3)pos[d.num].top3++;
+      if(idx<5)pos[d.num].top5++;
+    });
   }
   Object.keys(pos).forEach(k=>{pos[k].top1/=iter;pos[k].top3/=iter;pos[k].top5/=iter});
   return pos;
@@ -243,22 +459,44 @@ function simulate(analyses,iter=5000){
 
 function generateCombos(analyses,mc,size,max){
   const ranked=analyses.slice().sort((a,b)=>b.globalScore-a.globalScore);
-  const pool=new Set();ranked.slice(0,Math.min(12,ranked.length)).forEach(a=>pool.add(a.numero));
+  const pool=new Set();
+  ranked.slice(0,Math.min(14,ranked.length)).forEach(a=>pool.add(a.numero));
   analyses.filter(a=>a.estOutsider).forEach(a=>pool.add(a.numero));
   const arr=Array.from(pool);if(arr.length<size)return[];
   const combos=[];let ex=0;
-  function rec(start,cur){if(ex>50000)return;if(cur.length===size){ex++;combos.push(cur.slice());return}for(let i=start;i<arr.length;i++){cur.push(arr[i]);rec(i+1,cur);cur.pop()}}
+  function rec(start,cur){
+    if(ex>80000)return;
+    if(cur.length===size){ex++;combos.push(cur.slice());return}
+    for(let i=start;i<arr.length;i++){cur.push(arr[i]);rec(i+1,cur);cur.pop()}
+  }
   rec(0,[]);
-  const ev=combos.map(nums=>{let pr=1;nums.forEach(n=>{const p=mc[n];if(!p)return;pr*=(size<=1?p.top1:size<=3?p.top3:p.top5)});const conf=Math.pow(pr,1/size);const op=nums.some(n=>analyses.find(a=>a.numero===n)?.estOutsider);const sc=nums.map(n=>analyses.find(a=>a.numero===n)?.globalScore||0);const m=sc.reduce((a,b)=>a+b,0)/sc.length;const v=sc.reduce((a,b)=>a+Math.pow(b-m,2),0)/sc.length;return{nums,conf,robust:Math.max(0,1-v*4),op,risque:1-conf}});
+  const ev=combos.map(nums=>{
+    let pr=1;
+    nums.forEach(n=>{const p=mc[n];if(!p)return;pr*=(size<=1?p.top1:size<=3?p.top3:p.top5)});
+    const conf=Math.pow(pr,1/size);
+    const op=nums.some(n=>analyses.find(a=>a.numero===n)?.estOutsider);
+    const sc=nums.map(n=>analyses.find(a=>a.numero===n)?.globalScore||0);
+    const m=sc.reduce((a,b)=>a+b,0)/sc.length;
+    const v=sc.reduce((a,b)=>a+Math.pow(b-m,2),0)/sc.length;
+    return{nums,conf,robust:Math.max(0,1-v*4),op,risque:1-conf};
+  });
   ev.sort((a,b)=>b.conf-a.conf);
   return ev.slice(0,max);
 }
 
 function buildComboOutput(c,analyses,scenario){
   const noms=c.nums.map(n=>analyses.find(a=>a.numero===n)?.nom||'?');
-  const ex=[];c.nums.forEach(n=>{const a=analyses.find(x=>x.numero===n);if(!a)return;const top=a.factors.slice().sort((x,y)=>(y.weight*y.value)-(x.weight*x.value)).slice(0,2);top.forEach(f=>{if(f.weight*f.value>.05)ex.push(String(n).padStart(2,'0')+' '+a.nom+' : '+f.label+' ('+f.value.toFixed(2)+')')})});
+  const ex=[];
+  c.nums.forEach(n=>{
+    const a=analyses.find(x=>x.numero===n);
+    if(!a)return;
+    const top=a.factors.slice().sort((x,y)=>(y.weight*y.value)-(x.weight*x.value)).slice(0,2);
+    top.forEach(f=>{
+      if(f.weight*f.value>0.08)ex.push(`${String(n).padStart(2,'0')} ${a.nom} : ${f.label}`);
+    });
+  });
   if(c.op)ex.push("Outsider inclus (diversification)");
-  return{scenario,numeros:c.nums,noms,confiance:c.conf,robustesse:c.robust,risque:c.risque,outsiderPresent:c.op,explications:ex.slice(0,6)};
+  return{scenario,numeros:c.nums,noms,confiance:c.conf,robustesse:c.robust,risque:c.risque,outsiderPresent:c.op,explications:ex.slice(0,8)};
 }
 
 function showScreen(n){
@@ -279,13 +517,14 @@ function renderAccueil(){
     el.innerHTML='<div class="empty"><div class="empty-icon">📡</div><p>Aucune course</p><button class="btn" onclick="loadAll()">Recharger</button></div>';
     return;
   }
-  const byReu={};STATE.courses.forEach(c=>{(byReu[c.reunion]=byReu[c.reunion]||[]).push(c)});
-  let html='<div class="info">'+STATE.courses.length+' courses · '+new Date().toLocaleTimeString('fr-FR')+'</div>';
+  const byReu={};
+  STATE.courses.forEach(c=>{(byReu[c.reunion]=byReu[c.reunion]||[]).push(c)});
+  let html=`<div class="info">${STATE.courses.length} courses · ${new Date().toLocaleTimeString('fr-FR')}</div>`;
   Object.keys(byReu).sort((a,b)=>a-b).forEach(r=>{
     const reu=byReu[r];
-    html+='<div class="reunion-header">RÉUNION '+r+' · '+(reu[0].hippodrome||'')+'</div>';
+    html+=`<div class="reunion-header">RÉUNION ${r} · ${reu[0].hippodrome||''}</div>`;
     reu.forEach(c=>{
-      html+='<div class="race-item" onclick="selectCourse(\''+c.id+'\')"><div class="rn">C'+c.numero+' — '+c.nom+'</div><div class="rm">'+c.heure+' · '+(c.distance?c.distance+'m':'')+' '+(c.discipline||'')+'</div></div>';
+      html+=`<div class="race-item" onclick="selectCourse('${c.id}')"><div class="rn">C${c.numero} — ${c.nom}</div><div class="rm">${c.heure} · ${c.distance?c.distance+'m':''} ${c.discipline||''} · ${c.nbDeclares}p</div></div>`;
     });
   });
   el.innerHTML=html;
@@ -295,26 +534,31 @@ async function selectCourse(id){
   const c=STATE.courses.find(x=>x.id===id);
   if(!c)return;
   showScreen('course');
-  document.getElementById('course-content').innerHTML='<div class="empty"><div class="loader"></div><p style="margin-top:12px">Chargement des partants...</p></div>';
+  document.getElementById('course-content').innerHTML='<div class="empty"><div class="loader"></div><p style="margin-top:12px">Analyse approfondie en cours...</p><p style="font-size:11px;color:#6b7899;margin-top:8px">Récupération des 15 dernières courses de chaque cheval</p></div>';
+  
   if(!c.partants.length){
     c.partants=await fetchParticipants(c);
   }
   if(!c.partants.length){
-    document.getElementById('course-content').innerHTML='<div class="card"><div class="error">Aucun partant disponible. Essaie une autre course.</div><button class="btn" onclick="showScreen(\'accueil\')">Retour</button></div>';
+    document.getElementById('course-content').innerHTML='<div class="card"><div class="error">Aucun partant disponible.</div><button class="btn" onclick="showScreen(\'accueil\')">Retour</button></div>';
     return;
   }
+  
+  // Récupérer les performances détaillées
+  const perfMap=await fetchPerformances(c);
+  c.partants.forEach(p=>{
+    if(perfMap[p.numero]){
+      p.performancesDetaillees=perfMap[p.numero];
+    }
+  });
+  
   STATE.currentCourse=c;
   STATE.currentAnalysis=analyzeRace(c);
-  const mc=simulate(STATE.currentAnalysis.analyses,5000);
+  const mc=simulate(STATE.currentAnalysis.analyses,8000);
   const size=Math.min(5,STATE.currentAnalysis.analyses.length);
   STATE.currentAnalysis.mc=mc;
-  const cp=generateCombos(STATE.currentAnalysis.analyses,mc,size,1);
-  const ca=generateCombos(STATE.currentAnalysis.analyses,mc,size,1);
-  const cs=generateCombos(STATE.currentAnalysis.analyses,mc,size,1);
-  STATE.currentAnalysis.combinaisons=[];
-  if(cp[0])STATE.currentAnalysis.combinaisons.push(buildComboOutput(cp[0],STATE.currentAnalysis.analyses,'principal'));
-  if(ca[0])STATE.currentAnalysis.combinaisons.push(buildComboOutput(ca[0],STATE.currentAnalysis.analyses,'alternatif'));
-  if(cs[0])STATE.currentAnalysis.combinaisons.push(buildComboOutput(cs[0],STATE.currentAnalysis.analyses,'surprise'));
+  const combos=generateCombos(STATE.currentAnalysis.analyses,mc,size,3);
+  STATE.currentAnalysis.combinaisons=combos.map((cb,i)=>buildComboOutput(cb,STATE.currentAnalysis.analyses,['principal','alternatif','surprise'][i]||'autre'));
   renderCourse();
 }
 
@@ -322,12 +566,25 @@ function renderCourse(){
   const el=document.getElementById('course-content');
   if(!STATE.currentAnalysis){el.innerHTML='<div class="empty"><p>Sélectionne une course</p></div>';return}
   const c=STATE.currentCourse;
-  let html='<div class="card"><h2>R'+c.reunion+'C'+c.numero+' · '+c.hippodrome+'</h2><div style="font-size:12px;color:#b0b8d0">'+c.nom+'</div><div style="font-size:11px;color:#6b7899;margin-top:6px">'+c.heure+' · '+(c.distance?c.distance+'m':'')+' · '+(c.discipline||'')+'</div></div>';
-  html+='<div class="card"><h2>📊 Analyse ('+STATE.currentAnalysis.analyses.length+')</h2>';
-  STATE.currentAnalysis.analyses.forEach(a=>{
-    const p=(a.globalScore*100).toFixed(0);
-    const col=a.globalScore>.6?'score-high':a.globalScore>.4?'score-mid':'score-low';
-    html+='<div class="horse-row" onclick="showHorse('+a.numero+')"><div class="horse-num">'+a.numero+'</div><div class="horse-info"><div class="horse-name">'+a.nom+' '+(a.estOutsider?'<span class="badge badge-outsider">Outsider</span>':'')+' '+(a.rang===1?'<span class="badge badge-favori">Top</span>':'')+'</div><div class="horse-meta">'+(a.cote?'Cote '+a.cote.toFixed(2):'Cote —')+'</div><div class="score-bar"><div class="score-fill '+col+'" style="width:'+p+'%"></div></div></div><div class="horse-score">'+p+'%</div></div>';
+  let html=`<div class="card"><h2>R${c.reunion}C${c.numero} · ${c.hippodrome}</h2><div style="font-size:12px;color:#b0b8d0">${c.nom}</div><div style="font-size:11px;color:#6b7899;margin-top:6px">${c.heure} · ${c.distance?c.distance+'m':''} · ${c.discipline||''}</div></div>`;
+  html+=`<div class="card"><h2>📊 Analyse approfondie (${STATE.currentAnalysis.analyses.length} partants)</h2>`;
+  html+=`<div class="info" style="margin-bottom:12px">11 facteurs analys0)}%és ·"></ historique complet chargé</div>`;
+  STATEdiv.currentAnalysis.analyses.forEach(a=>{
+></    const p=(a.globalScore*100).toFixed(0);
+    const col=a.globalScore>.55?'score-high':a.globalScore>.4?'score-mid':'score-low';
+    const badges=[];
+    if(a.estOutsider)badges.push('<span class="badge badge-outsider">Outsider</span>');
+    if(a.rang===1)badges.push('<span class="badge badge-favori">Top</span>');
+    if(a.isValueBet)badges.push('<span class="badge badge-value">Value</span>');
+    html+=`<div class="horse-row" onclick="showHorse(${a.numero})">
+      <div class="horse-num">${a.numero}</div>
+      <div class="horse-info">
+        <div class="horse-name">${a.nom}${badges.join('')}</div>
+        <div class="horse-meta">${a.driver||'?'} · Cote ${a.cote?a.cote.toFixed(2):'—'} · ${a.nombreVictoires}/${a.nombreCourses} V</div>
+        <div class="score-bar"><div class="score-fill ${col}" style="width:${p}%"></div></div>
+      </div>
+      <div class="horse-score">${p}%</div>
+    </div>`;
   });
   html+='</div>';
   el.innerHTML=html;
@@ -336,13 +593,71 @@ function renderCourse(){
 function showHorse(num){
   const a=STATE.currentAnalysis.analyses.find(x=>x.numero===num);
   if(!a)return;
-  let html='<div class="card"><h2>'+a.numero+'. '+a.nom+'</h2><div style="font-size:12px;color:#b0b8d0">Score : '+(a.globalScore*100).toFixed(1)+'%</div>';
-  if(a.estOutsider)html+='<div class="warning" style="margin-top:10px">⚠️ '+a.signauxOutsider.join(' · ')+'</div>';
-  html+='</div><div class="card"><h3>Facteurs</h3>';
+  const wp=a.nombreCourses>0?((a.nombreVictoires/a.nombreCourses)*100).toFixed(1):'—';
+  const pp=a.nombreCourses>0?((a.nombrePlaces/a.nombreCourses)*100).toFixed(1):'—';
+  const g=a.gainsCarriere?Math.round(a.gainsCarriere).toLocaleString('fr-FR')+'€':'—';
+  const gm=a.nombreCourses>0&&a.gainsCarriere?Math.round(a.gainsCarriere/a.nombreCourses).toLocaleString('fr-FR')+'€':'—';
+  
+  let html=`<div class="card"><h2>${a.numero}. ${a.nom}</h2>
+    <div style="font-size:12px;color:#b0b8d0">${a.driver||'—'} · ${a.entraineur||'—'}</div>
+    <div style="font-size:11px;color:#6b7899;margin-top:4px">${a.sexe||''} ${a.age?a.age+' ans':''} · Cote ${a.cote?a.cote.toFixed(2):'—'}</div>
+    <div class="score-bar" style="margin-top:10px"><div class="score-fill score-high" style="width:${(a.globalScore*100).toFixed(div>
+    <div style="font-size:11px;color:#8892b0;text-align:right;margin-top:4px">Score : ${(a.globalScore*100).toFixed(1)}%</div>
+  </div>`;
+  
+  html+=`<div class="card"><h3>📈 Carrière</h3><div class="stat-grid">
+    <div class="stat-box"><div class="v">${a.nombreCourses}</div><div class="l">Courses</div></div>
+    <div class="stat-box"><div class="v">${a.nombreVictoires}</div><div class="l">Victoires</div></div>
+    <div class="stat-box"><div class="v">${wp}%</div><div class="l">% V</div></div>
+    <div class="stat-box"><div class="v">${a.nombrePlaces}</div><div class="l">Places</div></div>
+    <div class="stat-box"><div class="v">${pp}%</div><div class="l">% P</div></div>
+    <div class="stat-box"><div class="v">${gm}</div><div class="l">Gain/c</div></div>
+  </div></div>`;
+  
+  if(a.musique){
+    html+=`<div class="card"><h3>🎵 Musique</h3><div class="musique">${a.musique}</div>
+    <div style="font-size:10px;color:#8898b0;margin-top:8px">1=1er · 0=non placé · D=disqualifié</div></div>`;
+  }
+  
+  if(a.perfsDetaillees&&a.perfsDetaillees.length){
+    html+=`<div class="card"><h3>📋 Dernières courses détaillées</h3>`;
+    a.perfsDetaillees.slice(0,10).forEach(c=>{
+      const place=c.place||c.ordreArrivee;
+      const dist=c.distance||'—';
+      const hippo=(c.hippodrome&&(c.hippodrome.libelleCourt||c.hippodrome.libelleLong))||c.nomHippodrome||'—';
+      const nb=c.nombreParticipants||c.nbParticipants||'—';
+      let pc='pbad',pt='—';
+      if(place===1){pc='p1';pt='1er'}
+      else if(place===2){pc='p2';pt='2e'}
+      else if(place===3){pc='p3';pt='3e'}
+      else if(place){pt=place+'e'}
+      html+=`<div class="perf-line">
+        <span class="perf-place ${pc}">${pt}</span>
+        <span class="perf-info">${hippo}</span>
+        <span class="perf-dist">${dist}m · ${nb}p</span>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  
+  if(a.estOutsider&&a.signauxOutsider.length){
+    html+=`<div class="card"><h3>⚡ Signaux outsider</h3>`;
+    a.signauxOutsider.forEach(s=>{html+=`<div style="font-size:12px;color:#CE93D8;padding:4px 0">• ${s}</div>`});
+    html+=`</div>`;
+  }
+  
+  html+=`<div class="card"><h3>🔬 Facteurs (11 analysés)</h3>`;
   a.factors.slice().sort((x,y)=>(y.weight*y.value)-(x.weight*x.value)).forEach(f=>{
-    html+='<div class="factor"><span class="factor-name">'+f.label+'</span><span class="factor-val">'+f.value.toFixed(2)+'</span></div>';
+    const pct=(f.value*100).toFixed(0);
+    html+=`<div class="factor">
+      <span class="factor-name">${f.label}</span>
+      <div class="factor-bar"><div class="factor-bar-fill" style="width:${pct}%"></div></div>
+      <span class="factor-val">${pct}%</span>
+    </div>`;
   });
-  html+='</div><button class="btn btn-outline" onclick="renderCourse()">← Retour</button>';
+  html+=`</div>`;
+  
+  html+=`<button class="btn btn-outline" onclick="renderCourse()">← Retour</button>`;
   document.getElementById('course-content').innerHTML=html;
 }
 
@@ -350,11 +665,23 @@ function renderResultat(){
   const el=document.getElementById('resultat-content');
   if(!STATE.currentAnalysis){el.innerHTML='<div class="empty"><div class="empty-icon">🎯</div><p>Sélectionne une course</p></div>';return}
   const combos=STATE.currentAnalysis.combinaisons;const s=STATE.seuil;
+  if(!combos.length){el.innerHTML='<div class="card"><div class="error">Pas assez de partants</div></div>';return}
   const f=combos.filter(c=>c.confiance>=s);
-  if(!f.length){el.innerHTML='<div class="card"><div class="warning">Aucune combinaison au-dessus du seuil '+(s*100).toFixed(0)+'%</div></div>';return}
-  let html='<div class="info">Seuil '+(s*100).toFixed(0)+'% · '+f.length+' combinaison(s)</div>';
-  f.forEach(c=>{
-    html+='<div class="combo"><div class="combo-header"><span class="combo-scenario scenario-'+c.scenario+'">'+c.scenario+'</span><span class="combo-conf">'+(c.confiance*100).toFixed(0)+'%</span></div><div class="combo-nums">'+c.numeros.map((n,i)=>'<span class="combo-num">'+String(n).padStart(2,'0')+' '+c.noms[i]+'</span>').join('')+'</div><div class="combo-detail">Robustesse '+(c.robustesse*100).toFixed(0)+'% · Risque '+(c.risque*100).toFixed(0)+'%'+(c.outsiderPresent?' · ⚠️ Outsider':'')+'</div>'+(c.explications.length?'<details><summary>Pourquoi ?</summary><div class="combo-expl">'+c.explications.map(e=>'• '+e).join('<br>')+'</div></details>':'')+'</div>';
+  const showAll=!f.length;
+  const display=showAll?combos.slice(0,1):f;
+  let html='';
+  if(showAll){
+    html+=`<div class="warning">Aucune combo au-dessus de ${(s*100).toFixed(0)}%. Meilleure : ${(combos[0].confiance*100).toFixed(0)}%. Baisse le seuil.</div>`;
+  } else {
+    html+=`<div class="info">Seuil ${(s*100).toFixed(0)}% · ${f.length} combo(s)</div>`;
+  }
+  display.forEach(c=>{
+    html+=`<div class="combo">
+      <div class="combo-header"><span class="combo-scenario scenario-${c.scenario}">${c.scenario}</span><span class="combo-conf">${(c.confiance*100).toFixed(0)}%</span></div>
+      <div class="combo-nums">${c.numeros.map((n,i)=>`<span class="combo-num">${String(n).padStart(2,'0')} ${c.noms[i]}</span>`).join('')}</div>
+      <div class="combo-detail">Robustesse ${(c.robustesse*100).toFixed(0)}% · Risque ${(c.risque*100).toFixed(0)}%${c.outsiderPresent?' · ⚠️ Outsider':''}</div>
+      ${c.explications.length?`<details><summary>Pourquoi ?</summary><div class="combo-expl">${c.explications.map(e=>'• '+e).join('<br>')}</div></details>`:''}
+    </div>`;
   });
   el.innerHTML=html;
 }
@@ -367,8 +694,8 @@ async function loadAll(){
     updateStatus(courses.length+' courses · '+new Date().toLocaleTimeString('fr-FR'));
     renderAccueil();
   }catch(e){
-    updateStatus('Erreur : '+e.message.substring(0,80));
-    document.getElementById('accueil-content').innerHTML='<div class="card"><div class="error">'+e.message+'</div><button class="btn" onclick="loadAll()">Réessayer</button></div>';
+    updateStatus('Erreur');
+    document.getElementById('accueil-content').innerHTML=`<div class="card"><div class="error">${e.message}</div><button class="btn" onclick="loadAll()">Réessayer</button></div>`;
   }
 }
 
