@@ -117,49 +117,29 @@ function todayFR(){
   return dd+mm+d.getFullYear();
 }
 
-// Proxies testés dans l'ordre - le premier qui marche gagne
-async function smartFetch(targetUrl){
-  const proxies=[
-    u=>'https://r.jina.ai/'+u,
-    u=>'https://corsproxy.io/?'+encodeURIComponent(u),
-    u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),
-    u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u)
-  ];
-  const errors=[];
-  for(const proxy of proxies){
-    try{
-      const ctrl=new AbortController();
-      const to=setTimeout(()=>ctrl.abort(),20000);
-      const res=await fetch(proxy(targetUrl),{signal:ctrl.signal});
-      clearTimeout(to);
-      if(!res.ok){errors.push('HTTP'+res.status);continue}
-      let text=await res.text();
-      // r.jina.ai retourne du markdown, on cherche le JSON dedans
-      if(text.includes('Markdown Content:')){
-        const idx=text.indexOf('Markdown Content:');
-        text=text.substring(idx+17).trim();
-      }
-      // Essaie de parser
-      try{return JSON.parse(text)}
-      catch(e){
-        // Cherche le premier { et le dernier }
-        const start=text.indexOf('{');
-        const end=text.lastIndexOf('}');
-        if(start>=0&&end>start){
-          try{return JSON.parse(text.substring(start,end+1))}
-          catch(e2){errors.push('parse');continue}
-        }
-        errors.push('nojson');continue;
-      }
-    }catch(e){errors.push(e.message||'fail');continue}
-  }
-  throw new Error('Proxies: '+errors.join(','));
+// jina.ai : proxy gratuit fiable qui retourne le contenu brut
+async function proxyFetch(targetUrl){
+  const url='https://r.jina.ai/'+targetUrl;
+  const ctrl=new AbortController();
+  const to=setTimeout(()=>ctrl.abort(),25000);
+  const res=await fetch(url,{
+    signal:ctrl.signal,
+    headers:{'Accept':'text/plain','X-Return-Format':'text'}
+  });
+  clearTimeout(to);
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  const text=await res.text();
+  // Jina retourne le JSON en brut (parfois avec entête Markdown)
+  const start=text.indexOf('{');
+  const end=text.lastIndexOf('}');
+  if(start<0||end<start)throw new Error('Pas de JSON dans la réponse');
+  return JSON.parse(text.substring(start,end+1));
 }
 
 async function fetchProgramme(){
   updateStatus('Chargement du programme...',true);
   const url='https://online.turfinfo.api.pmu.fr/rest/client/61/programme/'+todayFR();
-  const data=await smartFetch(url);
+  const data=await proxyFetch(url);
   return parseProgramme(data);
 }
 
@@ -190,7 +170,7 @@ function parseProgramme(data){
 async function fetchParticipants(course){
   const url='https://online.turfinfo.api.pmu.fr/rest/client/61/programme/'+todayFR()+'/R'+course.reunion+'/C'+course.numero+'/participants';
   try{
-    const data=await smartFetch(url);
+    const data=await proxyFetch(url);
     const parts=[];
     (data.participants||[]).forEach(p=>{
       parts.push({
@@ -320,7 +300,7 @@ async function selectCourse(id){
     c.partants=await fetchParticipants(c);
   }
   if(!c.partants.length){
-    document.getElementById('course-content').innerHTML='<div class="card"><div class="error">Aucun partant disponible.<br>Essaie une autre course.</div><button class="btn" onclick="showScreen(\'accueil\')">Retour</button></div>';
+    document.getElementById('course-content').innerHTML='<div class="card"><div class="error">Aucun partant disponible. Essaie une autre course.</div><button class="btn" onclick="showScreen(\'accueil\')">Retour</button></div>';
     return;
   }
   STATE.currentCourse=c;
@@ -387,7 +367,7 @@ async function loadAll(){
     updateStatus(courses.length+' courses · '+new Date().toLocaleTimeString('fr-FR'));
     renderAccueil();
   }catch(e){
-    updateStatus('Erreur : '+e.message.substring(0,60));
+    updateStatus('Erreur : '+e.message.substring(0,80));
     document.getElementById('accueil-content').innerHTML='<div class="card"><div class="error">'+e.message+'</div><button class="btn" onclick="loadAll()">Réessayer</button></div>';
   }
 }
